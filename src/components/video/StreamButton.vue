@@ -35,7 +35,7 @@ export default {
         video: {
           width: { max: 1280 },
           height: { max: 720 },
-          frameRate: { max: 240 },
+          frameRate: { max: 24 },
         },
       },
       calls: [],
