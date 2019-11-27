@@ -1,0 +1,39 @@
+@mixin horizontal-spacing($spacing) {
+	margin-right: $spacing;
+	&:last-child {
+		margin-right: 0;
+	}
+}
+@mixin vertical-spacing($spacing) {
+	margin-bottom: $spacing;
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+@mixin three-row($spacing) {
+	flex-basis: calc(33.333% - #{$spacing});
+	flex-grow: 1;
+	height: 100%;
+	&:nth-child(3n + 3) {
+		margin-right: 0;
+	}
+}
+@mixin two-row($spacing) {
+	flex-basis: calc(50% - #{$spacing});
+	flex-grow: 1;
+	height: 100%;
+	&:nth-child(2n + 2) {
+		margin-right: 0;
+	}
+}
+//MEDIA QUERIES
+@mixin breakpoint($size) {
+	@media only screen and (min-width: $size + px) {
+		@content;
+	}
+}
+@mixin breakpoint-max($size) {
+	@media only screen and (max-width: $size + px) {
+		@content;
+	}
+}

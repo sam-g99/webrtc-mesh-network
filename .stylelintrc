@@ -1,0 +1,31 @@
+{
+  "extends": "stylelint-config-standard",
+  "ignoreFiles": [
+    "src/assets/**"
+  ],
+  "plugins": [
+    "stylelint-order",
+    "stylelint-scss",
+    "stylelint-prettier"
+  ],
+  "rules": {
+      "order/order": [ 
+        [
+          "custom-properties",
+          "declarations"
+        ],
+        {
+          "disableFix": false
+        }
+      ],
+      "order/properties-alphabetical-order": true,
+      "string-quotes": "single",
+      "number-leading-zero": "always",
+      "at-rule-no-unknown": null,
+      "scss/at-rule-no-unknown": true,
+      "length-zero-no-unit": null,
+      "no-empty-source": null,
+      "at-rule-empty-line-before": null,
+      "no-descending-specificity": null
+  }
+}
