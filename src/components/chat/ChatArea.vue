@@ -16,34 +16,45 @@
           </p>
         </div>
         <div class="date">
-          1:00pm
+          {{ convertDate(message.date) }}
         </div>
-        <div class="content">
+        <div v-if="message.content" class="content">
           <p>{{ message.content }}</p>
+        </div>
+        <div v-if="message.img" class="message-image">
+          <img :src="message.img" />
         </div>
       </div>
     </div>
+    {{ currentlyTyping }} is typing
     <input
       v-model.trim="currentMessage"
       type="text"
-      @keyup.enter="sendMessage()"
+      @keyup.enter="sendMessage"
+      @keyup="isTyping"
     />
-    <ImageSharing @blob="setImage" />
+    <ImageSharing @dataUrl="setImage" />
     <img v-if="image" id="image" class="main-image" :src="image" />
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import moment from 'moment';
 import ImageSharing from './ImageSharing';
 
 export default {
   components: { ImageSharing },
   data() {
     return {
+      compressedImage: null,
+      currentlyTyping: [],
       currentMessage: '',
+      fullImage: null,
+      image: null,
       messages: [],
-      image: 'ss',
+      timeout: undefined,
+      typing: false,
     };
   },
   computed: {
@@ -59,20 +70,32 @@ export default {
   mounted() {},
 
   methods: {
-    convertDataLink(inputFile) {
-      const temporaryFileReader = new FileReader();
-
-      return new Promise((resolve, reject) => {
-        temporaryFileReader.onerror = () => {
-          temporaryFileReader.abort();
-          reject(new DOMException('Problem parsing input file.'));
-        };
-
-        temporaryFileReader.onloadend = () => {
-          resolve(temporaryFileReader.result);
-        };
-        temporaryFileReader.readAsDataURL(inputFile);
+    typingTimeout() {
+      this.typing = false;
+      this.sendToAllPeers(this.conns, {
+        type: 'typing',
+        status: false,
+        username: this.username,
       });
+      console.log('stopped typing');
+    },
+    isTyping() {
+      if (this.typing === false) {
+        console.log('typing');
+        this.typing = true;
+        this.sendToAllPeers(this.conns, {
+          type: 'typing',
+          status: true,
+          username: this.username,
+        });
+        this.timeout = setTimeout(this.typingTimeout, 2000);
+      } else {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(this.typingTimeout, 2000);
+      }
+    },
+    convertDate(date) {
+      return moment(date).calendar();
     },
     createMessageObject() {
       return {
@@ -80,32 +103,39 @@ export default {
         author: this.username,
         date: new Date(),
         content: this.currentMessage,
+        img: this.image,
       };
     },
-    sendMessage() {
-      const message = this.createMessageObject();
-      this.messages.push(message);
-      this.sendToAllPeers(this.conns, message);
+    resetToTop() {
       const container = this.$refs.chatContainer;
       setTimeout(() => {
         container.scrollTop = container.scrollHeight;
       });
     },
-    async setImage(blob) {
-      console.log('image set');
-      console.log(blob);
-      var reader = new FileReader();
-      reader.readAsDataURL(blob);
-      const base64data = await this.convertDataLink(blob);
-      console.log(base64data);
-      this.image = base64data;
-      this.sendToAllPeers(this.conns, { type: 'image', blob: base64data });
+    sendMessage() {
+      const message = this.createMessageObject();
+      this.messages.push(message);
+      this.sendToAllPeers(this.conns, message);
+      this.image = null;
+      this.currentMessage = '';
+      //this.resetToTop();
+    },
+    async setImage(imageDataUrl) {
+      this.image = imageDataUrl;
     },
     listenForMessages(conn) {
       conn.on('data', msg => {
         console.log('message', msg);
+        if (msg.type === 'typing') {
+          if (msg.status === true) {
+            this.currentlyTyping.push(msg.username);
+          } else {
+            this.currentlyTyping = [];
+          }
+          return;
+        }
         if (msg.type === 'image') {
-          document.getElementById('image').src = msg.blob;
+          document.getElementById('image').src = msg.dataUrl;
           console.log('image recieved');
           return;
         }
@@ -127,5 +157,11 @@ export default {
 <style lang="scss" scoped>
 .main-image {
   max-width: 300px;
+}
+
+.message-image {
+  img {
+    max-width: 300px;
+  }
 }
 </style>

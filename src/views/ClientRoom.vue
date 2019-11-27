@@ -1,11 +1,16 @@
 <template>
-  <div>{{ roomUsernames }}</div>
+  <div>
+    <VideoPlayer />
+    {{ roomUsernames }}
+  </div>
 </template>
 
 <script>
 import { mapState, mapMutations } from 'vuex';
+import VideoPlayer from '@/components/video/VideoPlayer';
 
 export default {
+  components: { VideoPlayer },
   data() {
     return {
       streaming: false,
@@ -27,9 +32,10 @@ export default {
     this.connectToPeerServer();
     this.connectToHost();
     this.listenForConnections();
+    this.listenForStream();
   },
   methods: {
-    ...mapMutations(['addUsername', 'addConnection', 'opened']),
+    ...mapMutations(['addUsername', 'addConnection', 'opened', 'updateStream']),
 
     disconnectEvent(conn) {
       conn.on('close', () => {
@@ -128,6 +134,15 @@ export default {
           });
 
           this.disconnectEvent(conn);
+        });
+      });
+    },
+    listenForStream() {
+      this.peerBroker.on('call', call => {
+        call.answer();
+        call.on('stream', hostStream => {
+          console.log('stream recieved', hostStream);
+          this.updateStream(hostStream);
         });
       });
     },

@@ -23,7 +23,7 @@ export default new Vuex.Store({
     open: false,
     username: '',
     roomUsernames: [],
-    videoStream: '',
+    videoStream: null,
     ready: false,
   },
   actions: {},
@@ -46,8 +46,8 @@ export default new Vuex.Store({
     removeConnection(state, index) {
       state.conns.splice(index, 1);
     },
-    updateStream(state, payLoad) {
-      state.stream = payLoad;
+    updateStream(state, media) {
+      state.videoStream = media;
     },
     setPeerConnection(state, conn) {
       state.peerBroker = conn;

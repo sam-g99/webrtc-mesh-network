@@ -1,13 +1,18 @@
 <template>
   <div>
+    <VideoPlayer />
+    <StreamButton />
     {{ roomUsernames }}
   </div>
 </template>
 
 <script>
 import { mapState, mapMutations } from 'vuex';
+import VideoPlayer from '@/components/video/VideoPlayer';
+import StreamButton from '@/components/video/StreamButton';
 
 export default {
+  components: { VideoPlayer, StreamButton },
   data() {
     return {
       streaming: false,
@@ -23,6 +28,7 @@ export default {
       'ready',
       'username',
       'roomUsernames',
+      'videoStream',
     ]),
   },
   mounted() {
@@ -122,6 +128,9 @@ export default {
                 peerId: this.hostId,
               });
 
+              if (this.videoStream) {
+                this.peerBroker.call(conn.peer, this.videoStream);
+              }
               this.disconnectEvent(conn);
             }
           });
