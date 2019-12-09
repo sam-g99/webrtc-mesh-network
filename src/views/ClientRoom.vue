@@ -1,16 +1,17 @@
 <template>
-  <div>
+  <div class="main-content">
     <VideoPlayer />
-    {{ roomUsernames }}
+    <RoomMembers />
   </div>
 </template>
 
 <script>
 import { mapState, mapMutations } from 'vuex';
 import VideoPlayer from '@/components/video/VideoPlayer';
+import RoomMembers from '@/components/RoomMembers';
 
 export default {
-  components: { VideoPlayer },
+  components: { VideoPlayer, RoomMembers },
   data() {
     return {
       streaming: false,
@@ -81,9 +82,10 @@ export default {
 
       hostConnection.on('open', () => {
         console.log('Host connection open', hostConnection);
-        this.opened();
+        this.opened(); // telling vuex store conn open
         this.addConnection(hostConnection);
         console.log('Sent username', this.username);
+        // USER INFO COMPONENT SENDS THE CLIENTS DATA TO HOST
         hostConnection.on('data', data => {
           switch (data.type) {
             case 'username':
@@ -100,6 +102,7 @@ export default {
                 newConnection.send({
                   type: 'username',
                   name: this.username,
+                  avatar: this.avatar,
                   peerId: this.peerBroker.id,
                 });
                 newConnection.on('data', data => {
@@ -123,6 +126,7 @@ export default {
           conn.send({
             type: 'username',
             name: this.username,
+            avatar: this.avatar,
             peerId: this.peerBroker.id,
           });
 
@@ -151,6 +155,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.main-content {
+  width: 100%;
+}
+
 .test {
   height: 100px;
   width: 100px;

@@ -18,13 +18,15 @@ export default new Vuex.Store({
     avatar: '',
     connectedUsernames: '',
     conns: [],
+    currentlyTyping: [],
     maxConnections: 10,
+    messages: [],
+    open: false, // set to false!
     peerBroker: null,
-    open: false,
-    username: '',
-    roomUsernames: [],
-    videoStream: null,
     ready: false,
+    roomUsernames: [],
+    username: '',
+    videoStream: null,
   },
   actions: {},
   mutations: {
@@ -57,6 +59,15 @@ export default new Vuex.Store({
     },
     removeUsername(state, index) {
       state.roomUsernames.splice(index, 1);
+    },
+    addMessage(state, message) {
+      state.messages.push(message);
+    },
+    currentlyTyping(state, user) {
+      state.currentlyTyping.push(user);
+    },
+    stoppedTyping(state, index) {
+      state.currentlyTyping.splice(index, 1);
     },
   },
   plugins: [vuexLocal.plugin],

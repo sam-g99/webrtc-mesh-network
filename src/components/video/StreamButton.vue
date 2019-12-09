@@ -9,6 +9,27 @@
         {{ `${option.height}p` }}
       </option>
     </select>
+
+    <div
+      ref="selector"
+      class="select-quality"
+      @mouseenter="showOptions"
+      @mouseleave="hideOptions"
+    >
+      {{ max.height }}p
+      <div class="triangle" />
+      <div ref="options" class="options-container" :class="{ open: show }">
+        <div
+          v-for="option in options"
+          :key="option.height"
+          class="option"
+          :value="option"
+          @click="setResolution(option)"
+        >
+          {{ `${option.height}p` }}
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -40,6 +61,8 @@ export default {
       },
       calls: [],
       streaming: false,
+      currentQuality: 720,
+      show: false,
     };
   },
   computed: {
@@ -57,6 +80,15 @@ export default {
 
   methods: {
     ...mapMutations(['updateStream']),
+    showOptions() {
+      this.show = true;
+    },
+    hideOptions() {
+      this.show = false;
+    },
+    setResolution(res) {
+      this.max = res;
+    },
     async getStream() {
       let stream;
       try {
@@ -99,12 +131,11 @@ export default {
 
 <style lang="scss" scoped>
 button {
-  background: green;
+  background: rgb(17, 167, 17);
   border: none;
-  border-radius: 5px;
   color: white;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 300;
   margin-bottom: 10px;
   margin-top: 15px;
   padding: 10px;
@@ -112,5 +143,97 @@ button {
 
 .stop {
   background: red;
+}
+
+select {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: rgb(150, 150, 150);
+  background-position: right 0.7em top 50%, 0 0;
+  background-repeat: no-repeat, repeat;
+  background-size: 0.65em auto, 100%;
+  border: none;
+  border-radius: 0px;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+  color: #444;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 0;
+  margin-left: 10px;
+  padding: 10px;
+}
+
+.select-quality {
+  background: rgb(22, 22, 22);
+  border-radius: 5px;
+  color: $green;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+  padding: 5px;
+  width: fit-content;
+
+  .options-container {
+    overflow: hidden;
+    height: 0;
+    transition: height 0.2s;
+    will-change: height;
+    width: 100%;
+
+    .option {
+      padding: 5px;
+      border-radius: 5px;
+      width: 100%;
+
+      &:hover {
+        background: $green;
+        color: white;
+      }
+    }
+  }
+
+  .open {
+    height: 150px;
+  }
+
+  .triangle {
+    background: tan;
+    background: transparent;
+    border-bottom: 10px solid $green;
+    border-bottom-color: transparent;
+    border-left: 7px solid $green;
+    border-left-color: transparent;
+    border-right: 7px solid $green;
+    border-right-color: transparent;
+    border-top: 10px solid $green;
+    height: 0px;
+    margin: 0 auto;
+    position: absolute;
+    width: 0px;
+    right: 2px;
+    top: 15px;
+  }
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+select:hover {
+}
+
+select:focus {
+  color: #222;
+  outline: none;
+}
+
+select option {
+  font-weight: normal;
 }
 </style>

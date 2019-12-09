@@ -1,6 +1,12 @@
 <template>
-  <div>
+  <div v-if="!ready" class="info-container">
+    <h1>Webrtc Demo</h1>
+    <p class="sub">Screen/Tab Sharing via the browser</p>
+    <ChooseAvatar />
     <div class="username-container">
+      <div class="chosen-avatar">
+        <img :src="avatar.svg" alt="chosen avatar" />
+      </div>
       <input
         type="text"
         :value="username"
@@ -8,10 +14,17 @@
         :maxlength="max"
         required="true"
         @input="setUsername"
+        @keyup.enter="readyUp"
       />
       <span class="counter">{{ charactersLeft }}</span>
     </div>
-    <button :disabled="disabled" @click="ready">{{ buttonText }}</button>
+    <button
+      :disabled="disabled"
+      :class="{ disabled: disabled }"
+      @click="readyUp"
+    >
+      {{ buttonText }}
+    </button>
     <p v-if="longTime && !open" class="service-down">
       Taking a long time to get you a peer id, service may be down.
     </p>
@@ -20,8 +33,10 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex';
+import ChooseAvatar from './ChooseAvatar';
 
 export default {
+  components: { ChooseAvatar },
   data() {
     return {
       max: 16,
@@ -29,7 +44,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['avatar', 'username', 'open', 'conns', 'peerBroker']),
+    ...mapState(['avatar', 'username', 'open', 'conns', 'peerBroker', 'ready']),
     charactersLeft: function() {
       return this.max - this.username.length;
     },
@@ -64,13 +79,14 @@ export default {
     setUsername(e) {
       this.updateUsername(e.target.value);
     },
-    ready() {
+    readyUp() {
       this.setReady();
       if (this.$router.currentRoute.name === 'client') {
         console.log(this.conns[0]);
         this.conns[0].send({
           type: 'username',
           name: this.username,
+          avatar: this.avatar,
           peerId: this.peerBroker.id,
         });
       }
@@ -79,4 +95,115 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.info-container {
+  align-items: center;
+  background: $background;
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
+  z-index: 1000;
+
+  h1 {
+    color: $lightGreen;
+    font-family: 'Red Hat Text', 'Roboto', sans-serif;
+    font-size: 70px;
+    font-weight: 300;
+  }
+
+  .sub {
+    color: $offWhite;
+    font-size: 30px;
+    font-weight: 300;
+    margin-top: 10px;
+  }
+
+  .username-container {
+    display: flex;
+    margin-top: 20px;
+    position: relative;
+
+    input {
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0px 2px 2px rgb(39, 39, 39);
+      font-size: 20px;
+      outline: none;
+      padding: 15px;
+      width: 400px;
+    }
+
+    .counter {
+      color: $darkBlue;
+      font-size: 16px;
+      font-weight: bold;
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+
+  button {
+    background: rgb(12, 158, 105);
+    border-radius: 3px;
+    color: white;
+    font-size: 22px;
+    margin-top: 15px;
+    min-width: 150px;
+    padding: 12px;
+    padding-left: 15px;
+    transition-duration: 0.1s;
+
+    &:hover {
+      box-shadow: 0px 2px 2px rgba(19, 19, 19, 0.616);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      box-shadow: none;
+      transform: scale(1);
+    }
+  }
+
+  .disabled {
+    background: rgb(170, 170, 170);
+    color: rgb(19, 19, 19);
+  }
+
+  .service-down {
+    background: rgb(255, 94, 94);
+    border-radius: 100px;
+    color: rgb(94, 4, 4);
+    margin-top: 10px;
+    padding: 5px;
+  }
+}
+
+.chosen-avatar {
+  background: rgb(63, 63, 63);
+  border-radius: 100px;
+  height: 70px;
+  left: 0;
+  padding: 10px;
+  position: absolute;
+  top: 50%;
+  transform: translate(-105%, -50%);
+  width: 70px;
+
+  img {
+    -webkit-filter: drop-shadow(3px 3px 2px rgba(34, 34, 34, 0.7));
+    filter: drop-shadow(3px 3px 2px rgba(34, 34, 34, 0.7));
+    height: 50px;
+    transition: transform 0.1s;
+    width: 50px !important;
+
+    &:hover {
+      transform: scale(1.4);
+    }
+  }
+}
+</style>

@@ -8,6 +8,8 @@
 		"lint": "vue-cli-service lint"
 	},
 	"dependencies": {
+		"@dicebear/avatars": "^3.1.4",
+		"@dicebear/avatars-bottts-sprites": "^1.1.4",
 		"compressorjs": "^1.0.6",
 		"core-js": "^2.6.5",
 		"moment": "^2.24.0",

@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div class="main-content">
     <VideoPlayer />
     <StreamButton />
-    {{ roomUsernames }}
+    <RoomMembers />
   </div>
 </template>
 
@@ -10,9 +10,10 @@
 import { mapState, mapMutations } from 'vuex';
 import VideoPlayer from '@/components/video/VideoPlayer';
 import StreamButton from '@/components/video/StreamButton';
+import RoomMembers from '@/components/RoomMembers';
 
 export default {
-  components: { VideoPlayer, StreamButton },
+  components: { VideoPlayer, StreamButton, RoomMembers },
   data() {
     return {
       streaming: false,
@@ -121,9 +122,10 @@ export default {
               this.addConnection(conn);
               console.log('Added to connection list', conn);
 
-              // Sending host's chosen username
+              // Sending host's data
               conn.send({
                 type: 'username',
+                avatar: this.avatar,
                 name: this.username,
                 peerId: this.hostId,
               });
@@ -142,6 +144,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.main-content {
+  height: 100%;
+  overflow-y: auto;
+  width: 100%;
+  @include breakpoint-max($mobile) {
+    height: auto;
+  }
+}
+
 .test {
   height: 100px;
   width: 100px;
