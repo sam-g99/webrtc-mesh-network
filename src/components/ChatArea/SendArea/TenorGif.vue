@@ -18,19 +18,15 @@
         v-for="(gif, index) in results"
         :key="index"
         :src="gif"
+        loading="lazy"
         @click="sendGif(gif)"
       />
     </div>
-    <div v-if="suggestions" class="suggestions">
-      <ul>
-        <li v-for="suggestion in suggestions" :key="suggestion">
-          {{ suggestion }}
-        </li>
-      </ul>
-    </div>
+
     <div v-if="categories" class="categories">
       <div
         v-for="category in categories"
+        v-if="category.searchterm !== 'kiss'"
         :key="category.searchterm"
         @click="setQuery(category.searchterm)"
       >
@@ -141,7 +137,7 @@ export default {
     },
     async getCategories() {
       const response = await fetch(
-        `${this.api}categories?key=QRCRVY2HOQKE&contentfilter=medium`,
+        `${this.api}categories?key=QRCRVY2HOQKE&contentfilter=high`,
       );
       const result = await response.json();
       console.log(result.tags);
@@ -298,6 +294,8 @@ export default {
       text-align: center;
       padding: 40px;
       overflow: hidden;
+      height: 130px;
+      width: 160px;
       &:hover > .gif-background {
         transform: scale(1.1);
       }

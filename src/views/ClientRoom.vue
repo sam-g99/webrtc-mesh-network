@@ -36,7 +36,13 @@ export default {
     this.listenForStream();
   },
   methods: {
-    ...mapMutations(['addUsername', 'addConnection', 'opened', 'updateStream']),
+    ...mapMutations([
+      'addUsername',
+      'addConnection',
+      'opened',
+      'updateStream',
+      'setHostConn',
+    ]),
 
     disconnectEvent(conn) {
       conn.on('close', () => {
@@ -48,11 +54,6 @@ export default {
         this.roomUsernames.forEach((user, i) => {
           if (user.peerId === conn.peer) {
             this.roomUsernames.splice(i, 1);
-            if (i === 0) {
-              alert(
-                "Welp your host left, you're better off finding another or hosting a room yourself.",
-              );
-            }
           }
         });
       });
@@ -82,36 +83,44 @@ export default {
 
       hostConnection.on('open', () => {
         console.log('Host connection open', hostConnection);
+        this.setHostConn(hostConnection); // mutation
         this.opened(); // telling vuex store conn open
         this.addConnection(hostConnection);
         console.log('Sent username', this.username);
         // USER INFO COMPONENT SENDS THE CLIENTS DATA TO HOST
         hostConnection.on('data', data => {
+          console.log(data);
           switch (data.type) {
             case 'username':
               console.log("Recieved host's username", data);
               this.addUsername(data);
               break;
-            case 'connection': {
-              console.log('New connection arrived', data);
-              const newConnection = this.peerBroker.connect(data.id);
-              newConnection.on('open', () => {
-                console.log('New connection opened', newConnection);
-                this.addConnection(newConnection);
+            case 'connection':
+              {
+                console.log('New connection arrived', data);
+                const newConnection = this.peerBroker.connect(data.id);
+                newConnection.on('open', () => {
+                  console.log('New connection opened', newConnection);
+                  this.addConnection(newConnection);
 
-                newConnection.send({
-                  type: 'username',
-                  name: this.username,
-                  avatar: this.avatar,
-                  peerId: this.peerBroker.id,
+                  newConnection.send({
+                    type: 'username',
+                    name: this.username,
+                    avatar: this.avatar,
+                    peerId: this.peerBroker.id,
+                  });
+                  newConnection.on('data', data => {
+                    if (data.type === 'username') {
+                      console.log('Username recieved', data);
+                      this.addUsername(data);
+                    }
+                  });
                 });
-                newConnection.on('data', data => {
-                  if (data.type === 'username') {
-                    console.log('Username recieved', data);
-                    this.addUsername(data);
-                  }
-                });
-              });
+              }
+              break;
+            case 'streamStopped': {
+              console.log('ran');
+              this.updateStream(null); // mutation
             }
           }
         });

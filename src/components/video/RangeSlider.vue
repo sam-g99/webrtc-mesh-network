@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div id="track" class="range-slider">
+  <div class="range-container">
+    <div id="track" :class="{ show: show }" class="range-slider">
       <div id="progress" class="progress"></div>
       <div id="thumb" class="thumb"></div>
     </div>
@@ -151,5 +151,8 @@ export default {
     position: absolute;
     width: 100%;
   }
+}
+.show {
+  opacity: 1;
 }
 </style>

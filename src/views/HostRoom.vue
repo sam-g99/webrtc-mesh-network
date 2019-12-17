@@ -3,6 +3,9 @@
     <VideoPlayer />
     <StreamButton />
     <RoomMembers />
+    <CopyInput :shareLink="shareLink">
+      <p class="room-link">Room Link</p>
+    </CopyInput>
   </div>
 </template>
 
@@ -11,13 +14,15 @@ import { mapState, mapMutations } from 'vuex';
 import VideoPlayer from '@/components/video/VideoPlayer';
 import StreamButton from '@/components/video/StreamButton';
 import RoomMembers from '@/components/RoomMembers';
+import CopyInput from '@/components/CopyInput';
 
 export default {
-  components: { VideoPlayer, StreamButton, RoomMembers },
+  components: { VideoPlayer, StreamButton, RoomMembers, CopyInput },
   data() {
     return {
       streaming: false,
       hostId: '',
+      shareLink: '',
     };
   },
   computed: {
@@ -50,7 +55,7 @@ export default {
     know where to connect to, setting the share link, error checking */
     connectToPeerServer() {
       // Connection broker, helps peer clients connect to eachother through random ids (peerjs)
-      this.setPeerConnection(this.peerConnect('test556'));
+      this.setPeerConnection(this.peerConnect());
 
       console.log('Peer connection', this.peerBroker);
 
@@ -59,6 +64,7 @@ export default {
         this.hostId = id;
         this.opened();
         console.log('Host id set to', this.hostId);
+        this.shareLink = `${window.location.origin}/room/${id}`;
       });
 
       // Some error checking
@@ -108,7 +114,9 @@ export default {
           console.log('New connection opened, pending username.', conn.peer);
 
           conn.on('data', data => {
+            console.log('first event listener');
             if (data.type === 'username') {
+              //conn.off('data'); // turning off this event listener
               console.log('Recieved username', data);
               this.addUsername(data);
               console.log('Sending to previous connections', this.conns);
@@ -150,6 +158,11 @@ export default {
   width: 100%;
   @include breakpoint-max($mobile) {
     height: auto;
+  }
+
+  .room-link {
+    color: #28b2ff;
+    font-style: italic;
   }
 }
 

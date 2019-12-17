@@ -24,6 +24,8 @@ export default {
       image: null,
       timeout: undefined,
       typing: false,
+      connsAmount: 0,
+      typingTimeouts: [],
     };
   },
   computed: {
@@ -38,21 +40,64 @@ export default {
   },
   watch: {
     conns: function(newConns) {
-      const conn = newConns[newConns.length - 1];
-      this.listenForMessages(conn);
-      console.log('Watching for messages from', conn);
+      const index = newConns.length - 1;
+      const conn = newConns[index];
+      if (this.connsAmount + 1 === newConns.length) {
+        this.connsAmount += 1;
+        this.listenForMessages(conn);
+        console.log('listening for messages', conn);
+      } else {
+        console.log('stopped listening for messages from disconnected user');
+        this.connsAmount = newConns.length;
+      }
     },
   },
 
   methods: {
     ...mapMutations(['addMessage', 'stoppedTyping']),
+    clearTypingInterval(id) {
+      console.log('cleared interval');
+      const indexOfInterval = this.typingTimeouts.findIndex(
+        typer => typer.peerId === id,
+      );
+
+      clearTimeout(this.typingTimeouts[indexOfInterval].timeout);
+      this.typingTimeouts.splice(indexOfInterval, 0);
+      this.typingTimeouts.push({
+        timeout: setTimeout(() => {
+          this.noLongerTyping(id);
+          console.log('interval ran');
+        }, 7000),
+        peerId: id,
+      });
+    },
+    noLongerTyping(peerId) {
+      const isThePeerId = user => user.peerId === peerId;
+      const index = this.currentlyTyping.findIndex(isThePeerId);
+      this.stoppedTyping(index);
+    },
     listenForMessages(conn) {
       conn.on('data', msg => {
         if (msg.type === 'typing') {
+          //console.log('typing event', msg);
           if (msg.status === true) {
-            this.currentlyTyping.push(msg);
+            const isThePeerId = user => user.peerId === msg.peerId;
+            const alreadyTyping = this.currentlyTyping.some(isThePeerId);
+            if (!alreadyTyping) {
+              this.currentlyTyping.push(msg);
+              this.typingTimeouts.push({
+                timeout: setTimeout(() => {
+                  this.noLongerTyping(msg.peerId);
+                  console.log('interval ran');
+                }, 7000),
+                peerId: msg.peerId,
+              });
+            } else {
+              this.clearTypingInterval(msg.peerId);
+              console.log('still typing');
+            }
           } else {
-            this.stoppedTyping(0);
+            this.noLongerTyping(msg.peerId);
           }
           return;
         }
@@ -78,11 +123,10 @@ export default {
 
   @include breakpoint-max($mobile) {
     flex-basis: 50%;
-    height: auto;
-    width: 100%;
-    max-width: 100%;
     flex-grow: 1;
-    max-height: 50vh;
+    height: auto;
+    max-width: 100%;
+    width: 100%;
   }
 
   .title {

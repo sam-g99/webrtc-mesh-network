@@ -1,6 +1,6 @@
 <template>
-  <div class="controls">
-    <button class="volume" @click="toggleMute">
+  <div :class="{ show: show }" class="controls">
+    <button class="volume">
       <RangeSlider class="volume-slider" @valueChange="updateVolume" />
       <img
         :src="require('@/assets/images/videocontrols/max.svg')"
@@ -18,6 +18,12 @@ import RangeSlider from './RangeSlider';
 
 export default {
   components: { RangeSlider },
+  props: {
+    show: {
+      type: Boolean,
+      required: true,
+    },
+  },
   data() {
     return {
       value: 0,
@@ -25,12 +31,15 @@ export default {
       thumb: 0,
       change: 0,
       defaultThing: 0,
-      userVolume: 0,
+      userVolume: 1,
+      previousVolume: 1,
       muted: false,
+      showVolumeSlider: false,
     };
   },
   watch: {
     userVolume(volume) {
+      console.log('test');
       if (this.$parent.$refs.mainVideo.volume != volume) {
         this.$parent.$refs.mainVideo.volume = volume;
       }
@@ -52,18 +61,23 @@ export default {
     // }
   },
   methods: {
+    showSlider() {
+      this.showVolumeSlider = true;
+    },
     toggleVolume() {
-      if (this.muted) {
-        this.userVolume = 0;
+      if (!this.muted) {
+        console.log('muting');
         this.muted = true;
+        this.userVolume = 0;
       } else {
-        this.userVolume = this.previousVolume;
+        this.userVolume = 1;
+        this.muted = false;
       }
     },
     updateVolume(percentage) {
       this.userVolume = percentage / 100;
       if (percentage > 0) {
-        this.userVolume = percentage;
+        this.userVolume = percentage / 100;
       }
     },
     fullScreenToggle() {
@@ -102,11 +116,14 @@ export default {
   position: absolute;
   transform: translateY(-100%) translateX(-33px);
 }
+
 .controls {
   background: rgba(0, 0, 0, 0.575);
   opacity: 0;
-  transition-duration: 0.1s;
-  transition-delay: 0.1s;
+}
+
+.show {
+  opacity: 1;
 }
 
 .full-screen {

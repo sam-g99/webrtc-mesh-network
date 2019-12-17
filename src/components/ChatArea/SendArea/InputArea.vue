@@ -1,6 +1,6 @@
 <template>
   <textarea
-    id="textInput"
+    ref="textInput"
     v-model.trim="currentMessage"
     class="message-box"
     type="text"
@@ -25,6 +25,7 @@ export default {
       currentMessage: '',
       timeout: null,
       typing: false,
+      interval: null,
     };
   },
   computed: {
@@ -37,6 +38,12 @@ export default {
       }
     },
   },
+  watch: {
+    image: function() {
+      this.$refs.textInput.focus();
+    },
+  },
+
   mounted() {
     // document.onkeypress = function(e) {
     //   e = e || window.event;
@@ -54,18 +61,23 @@ export default {
         type: 'message',
         avatar: this.avatar.svg,
         author: this.username,
-        date: new Date(),
+        date: new Date().getTime(),
         content: this.currentMessage,
         img: this.image,
       };
     },
-    typingTimeout() {
-      this.typing = false;
+    sendTypingStatus(isTyping) {
       this.sendToAllPeers(this.conns, {
         type: 'typing',
-        status: false,
+        status: isTyping,
         username: this.username,
+        peerId: this.peerBroker.id,
       });
+    },
+    typingTimeout() {
+      clearInterval(this.interval);
+      this.typing = false;
+      this.sendTypingStatus(false);
       console.log('stopped typing');
     },
     isTyping() {
@@ -78,13 +90,11 @@ export default {
       if (this.typing === false) {
         console.log('typing');
         this.typing = true;
-        this.sendToAllPeers(this.conns, {
-          type: 'typing',
-          status: true,
-          username: this.username,
-          peerId: /*this.peerBroker.id*/ 888,
-        });
+        this.sendTypingStatus(true);
         this.timeout = setTimeout(this.typingTimeout, 1000);
+        this.interval = setInterval(() => {
+          this.sendTypingStatus(true);
+        }, 5000);
       } else {
         clearTimeout(this.timeout);
         this.timeout = setTimeout(this.typingTimeout, 1000);

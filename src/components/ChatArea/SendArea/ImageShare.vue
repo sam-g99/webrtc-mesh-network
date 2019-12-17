@@ -2,6 +2,7 @@
   <div :class="{ dragActive: draggedIn }" class="image-sharing">
     <input
       id="image"
+      ref="fileInput"
       type="file"
       name="image"
       accept="image/*"
@@ -35,29 +36,6 @@ export default {
         e.preventDefault();
         e.stopPropagation();
       }
-      // this.$refs.dropArea.addEventListener('drop', e => {
-      //   const imageDropped = e.dataTransfer.files[0];
-      //   console.log(imageDropped);
-      //   this.processImage(null, imageDropped);
-      // });
-      // document.addEventListener('dragover', e => {
-      //   e.preventDefault();
-      //   console.log(this.draggedIn);
-      //   this.draggedIn = true;
-      //   console.log('something is being dragged');
-      // });
-      // document.addEventListener(
-      //   'drop',
-      //   e => {
-      //     e = e || event;
-      //     e.preventDefault();
-      //     this.draggedIn = false;
-      //   },
-      //   false,
-      // );
-      // window.addEventListener('dragleave', () => {
-      //   this.draggedIn = false;
-      // });
     },
     convertToDataLink(inputFile) {
       const temporaryFileReader = new FileReader();
@@ -115,6 +93,8 @@ export default {
 
 <style lang="scss" scoped>
 .image-sharing {
+  position: relative;
+
   input {
     height: 0.1px;
     opacity: 0;
@@ -153,8 +133,6 @@ export default {
     right: 0;
     top: 0;
 
-    &:hover {
-    }
     &:hover > img {
       transform: scale(1.1);
     }
@@ -164,12 +142,13 @@ export default {
     }
   }
 }
+
 .dragActive {
+  height: 100%;
+  left: 0;
   position: absolute;
   top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
 
   label {
     background: blue;

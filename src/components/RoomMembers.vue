@@ -1,7 +1,7 @@
 <template>
   <div class="user-area">
     <div v-for="(user, index) in roomUsernames" :key="index" class="user-box">
-      <img width="100px" :src="user.avatar.svg" alt="user avatar" />
+      <img :src="user.avatar.svg" alt="user avatar" />
       {{ user.name }}
     </div>
   </div>
@@ -27,13 +27,22 @@ export default {
 
 <style lang="scss" scoped>
 .user-area {
+  display: flex;
   padding: 10px;
 }
+
 .user-box {
   display: flex;
   flex-flow: column;
   align-items: center;
   width: max-content;
   color: white;
+  @include horizontal-spacing(10px);
+  img {
+    width: 85px;
+
+    @include breakpoint-max(800) {
+    }
+  }
 }
 </style>

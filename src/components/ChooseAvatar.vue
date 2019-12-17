@@ -2,6 +2,13 @@
   <div class="choose-container">
     <p class="pick">Choose an Avatar</p>
     <div class="avatar-container">
+      <button
+        :disabled="disableBackwards"
+        class="button-arrow arrow-backwards"
+        @click="backAvatars"
+      >
+        <span class="arrow"><</span>
+      </button>
       <div
         v-for="(avatar, index) in avatars[currentAvatars]"
         :key="index"
@@ -14,15 +21,19 @@
         </div>
         <p v-if="avatar.chosen">Chosen</p>
       </div>
+      <button
+        :disabled="disableForwards"
+        class="button-arrow arrow-forwards"
+        @click="forwardsAvatars"
+      >
+        <span class="arrow"> > </span>
+      </button>
     </div>
-    <!-- <button v-if="currentAvatars !== 0" @click="backAvatars">Back</button> -->
+
     <button ref="random" class="button random" @click="randomAvatar">
       <img src="@/assets/reload.svg" alt="reload icon" />
       <p>Random Avatars</p>
     </button>
-    <!-- <button v-if="avatars.length - 1 !== currentAvatars" @click="forwardsAvatars">
-      Forwards
-    </button> -->
   </div>
 </template>
 
@@ -37,6 +48,15 @@ export default {
       avatars: [],
       currentAvatars: 0,
     };
+  },
+  computed: {
+    disableBackwards() {
+      return this.currentAvatars === 0;
+    },
+
+    disableForwards() {
+      return this.avatars.length - 1 === this.currentAvatars;
+    },
   },
   mounted() {
     this.randomAvatar();
@@ -157,10 +177,16 @@ export default {
 }
 
 .avatar-option img {
+  -webkit-tap-highlight-color: transparent;
   cursor: pointer;
   transition: transform 0.1s;
   user-select: none;
   width: 100px;
+  -webkit-filter: drop-shadow(3px 3px 2px rgba(34, 34, 34, 0.7));
+  filter: drop-shadow(3px 3px 2px rgba(34, 34, 34, 0.7));
+  @include breakpoint-max(600) {
+    width: 80px;
+  }
 
   &:hover {
     transform: scale(1.1);
@@ -182,25 +208,68 @@ export default {
   border-radius: 100px;
   color: white;
   cursor: pointer;
-  font-size: 17px;
+  font-size: 16px;
   margin-top: 20px;
   outline: none;
   padding: 10px;
-  width: 250px;
+  width: 200px;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s;
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  @include breakpoint-max(600) {
+    padding: 8px;
+    width: 240px;
+  }
 }
 
 .button {
-  position: relative;
-  display: flex;
   align-items: center;
+  display: flex;
+  position: relative;
   p {
     text-align: center;
     width: 80%;
   }
+
   img {
     left: 10px;
     top: 6px;
-    width: 30px;
+    width: 27px;
   }
+}
+
+.button-arrow:disabled {
+  background: rgb(34, 34, 34);
+  color: white;
+  opacity: 0.8;
+}
+
+.button-arrow {
+  background: $green;
+  border-radius: 2px;
+  color: white;
+  padding: 10px;
+  position: absolute;
+  top: 50%;
+
+  &:hover:enabled {
+    color: white;
+  }
+}
+
+.arrow-backwards {
+  transform: translateX(-100%) translateY(-100%);
+}
+
+.arrow-forwards {
+  transform: translateY(-100%);
+}
+
+.arrow {
+  font-size: 25px;
 }
 </style>

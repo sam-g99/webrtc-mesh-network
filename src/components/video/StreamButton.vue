@@ -1,16 +1,17 @@
 <template>
-  <div>
+  <div class="stream-button-container">
     <button v-if="!videoStream" @click="getStream">Start Stream</button>
     <button v-if="videoStream" class="stop" @click="closeStream">
       Stop Stream
     </button>
-    <select v-model="max">
+    <!-- <select v-model="max">
       <option v-for="option in options" :key="option.height" :value="option">
         {{ `${option.height}p` }}
       </option>
-    </select>
+    </select> -->
 
     <div
+      v-if="!videoStream"
       ref="selector"
       class="select-quality"
       @mouseenter="showOptions"
@@ -120,7 +121,8 @@ export default {
         console.log('call closed', call);
       });
       this.conns.forEach(conn => {
-        conn.send({ type: 'streamStoppped' });
+        console.log('sent');
+        conn.send({ type: 'streamStopped' });
       });
       this.calls.length = 0; // fastest method
       //this.videoPlayer.srcObject = null;
@@ -130,6 +132,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.stream-button-container {
+  align-items: center;
+  display: inline-flex;
+  position: relative;
+  margin-left: calc(50% - 40px;);
+}
+
 button {
   background: rgb(17, 167, 17);
   border: none;
@@ -139,56 +148,35 @@ button {
   margin-bottom: 10px;
   margin-top: 15px;
   padding: 10px;
+  border-radius: 10px;
 }
 
 .stop {
   background: red;
 }
 
-select {
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  appearance: none;
-  background-color: rgb(150, 150, 150);
-  background-position: right 0.7em top 50%, 0 0;
-  background-repeat: no-repeat, repeat;
-  background-size: 0.65em auto, 100%;
-  border: none;
-  border-radius: 0px;
-  border-radius: 3px;
-  box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.04);
-  box-sizing: border-box;
-  color: #444;
-  cursor: pointer;
-  font-family: sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.3;
-  margin: 0;
-  margin-left: 10px;
-  padding: 10px;
-}
-
 .select-quality {
   background: rgb(22, 22, 22);
-  border-radius: 5px;
+  border-radius: 2px;
   color: $green;
   cursor: pointer;
-  position: relative;
-  user-select: none;
   padding: 5px;
-  width: fit-content;
+  position: absolute;
+  top: 20px;
+  right: -5px;
+  user-select: none;
+  transform: translateX(100%);
 
   .options-container {
-    overflow: hidden;
     height: 0;
+    overflow: hidden;
     transition: height 0.2s;
-    will-change: height;
     width: 100%;
+    will-change: height;
 
     .option {
-      padding: 5px;
       border-radius: 5px;
+      padding: 5px;
       width: 100%;
 
       &:hover {
@@ -199,7 +187,7 @@ select {
   }
 
   .open {
-    height: 150px;
+    height: 115px;
   }
 
   .triangle {
@@ -215,9 +203,9 @@ select {
     height: 0px;
     margin: 0 auto;
     position: absolute;
-    width: 0px;
     right: 2px;
     top: 15px;
+    width: 0px;
   }
 }
 

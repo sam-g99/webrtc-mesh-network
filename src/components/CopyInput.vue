@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="copy-input-container">
     <slot></slot>
     <input
       ref="textToCopy"
@@ -34,15 +34,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.room-link-container {
+.copy-input-container {
+  bottom: 10px;
   padding: 10px;
+  position: absolute;
 
   .copy-input {
-    background: #25213d;
+    background: #ffffff00;
     border: none;
     color: white;
-    font-size: 20px;
-    padding: 10px;
+    font-size: 16px;
+    outline: none;
+    padding: 0px;
+    user-select: none;
+    width: 270px;
   }
 
   p {
@@ -56,7 +61,10 @@ export default {
     background: rgb(41, 121, 226);
     border: none;
     color: white;
-    padding: 13px;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 60px;
   }
 }
 </style>

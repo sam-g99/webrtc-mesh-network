@@ -19,6 +19,7 @@ export default new Vuex.Store({
     connectedUsernames: '',
     conns: [],
     currentlyTyping: [],
+    hostConn: null,
     maxConnections: 10,
     messages: [],
     open: false, // set to false!
@@ -68,6 +69,9 @@ export default new Vuex.Store({
     },
     stoppedTyping(state, index) {
       state.currentlyTyping.splice(index, 1);
+    },
+    setHostConn(state, conn) {
+      state.hostConn = conn;
     },
   },
   plugins: [vuexLocal.plugin],

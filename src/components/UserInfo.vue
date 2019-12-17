@@ -5,7 +5,7 @@
     <ChooseAvatar />
     <div class="username-container">
       <div class="chosen-avatar">
-        <img :src="avatar.svg" alt="chosen avatar" />
+        <img v-if="avatar.svg" :src="avatar.svg" alt="chosen avatar" />
       </div>
       <input
         type="text"
@@ -20,13 +20,13 @@
     </div>
     <button
       :disabled="disabled"
-      :class="{ disabled: disabled }"
+      :class="{ disabled: disabled, client: clientRoute }"
       @click="readyUp"
     >
       {{ buttonText }}
     </button>
     <p v-if="longTime && !open" class="service-down">
-      Taking a long time to get you a peer id, service may be down.
+      {{ alertMessage }}
     </p>
   </div>
 </template>
@@ -65,6 +65,17 @@ export default {
         return true;
       }
     },
+
+    clientRoute() {
+      return this.$route.name === 'client';
+    },
+    alertMessage() {
+      if (this.clientRoute) {
+        return 'Taking a long to connect to host, host may not exist, or a turn server is needed.';
+      } else {
+        return 'Taking a long time to get you a peer id, service may be down.';
+      }
+    },
   },
   mounted() {
     setTimeout(() => {
@@ -80,6 +91,9 @@ export default {
       this.updateUsername(e.target.value);
     },
     readyUp() {
+      if (this.disabled) {
+        return;
+      }
       this.setReady();
       if (this.$router.currentRoute.name === 'client') {
         console.log(this.conns[0]);
@@ -101,17 +115,20 @@ export default {
   background: $background;
   display: flex;
   flex-flow: column;
-  height: 100%;
   justify-content: center;
+  min-height: 100vh;
   position: absolute;
   width: 100%;
-  z-index: 1000;
+  z-index: 500;
 
   h1 {
     color: $lightGreen;
     font-family: 'Red Hat Text', 'Roboto', sans-serif;
     font-size: 70px;
     font-weight: 300;
+    @include breakpoint-max(600) {
+      font-size: 55px;
+    }
   }
 
   .sub {
@@ -119,10 +136,16 @@ export default {
     font-size: 30px;
     font-weight: 300;
     margin-top: 10px;
+
+    @include breakpoint-max(600) {
+      font-size: 22px;
+    }
   }
 
   .username-container {
+    align-self: center;
     display: flex;
+    margin-right: -35px;
     margin-top: 20px;
     position: relative;
 
@@ -134,6 +157,9 @@ export default {
       outline: none;
       padding: 15px;
       width: 400px;
+      @include breakpoint-max(600) {
+        width: 300px;
+      }
     }
 
     .counter {
@@ -144,6 +170,28 @@ export default {
       right: 10px;
       top: 50%;
       transform: translateY(-50%);
+    }
+
+    .chosen-avatar {
+      background: rgb(63, 63, 63);
+      border-radius: 100px;
+      height: 70px;
+      left: 0;
+      padding: 10px;
+      position: absolute;
+      top: 50%;
+      transform: translate(-105%, -50%);
+      width: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        -webkit-filter: drop-shadow(3px 3px 2px rgba(34, 34, 34, 0.7));
+        filter: drop-shadow(3px 3px 2px rgba(34, 34, 34, 0.7));
+        height: 60px;
+        width: 60px !important;
+      }
     }
   }
 
@@ -156,16 +204,15 @@ export default {
     min-width: 150px;
     padding: 12px;
     padding-left: 15px;
+    -webkit-tap-highlight-color: transparent;
     transition-duration: 0.1s;
 
     &:hover {
-      box-shadow: 0px 2px 2px rgba(19, 19, 19, 0.616);
-      transform: scale(1.05);
+      box-shadow: 0px 5px 5px rgba(19, 19, 19, 0.616);
     }
 
     &:active {
       box-shadow: none;
-      transform: scale(1);
     }
   }
 
@@ -180,30 +227,6 @@ export default {
     color: rgb(94, 4, 4);
     margin-top: 10px;
     padding: 5px;
-  }
-}
-
-.chosen-avatar {
-  background: rgb(63, 63, 63);
-  border-radius: 100px;
-  height: 70px;
-  left: 0;
-  padding: 10px;
-  position: absolute;
-  top: 50%;
-  transform: translate(-105%, -50%);
-  width: 70px;
-
-  img {
-    -webkit-filter: drop-shadow(3px 3px 2px rgba(34, 34, 34, 0.7));
-    filter: drop-shadow(3px 3px 2px rgba(34, 34, 34, 0.7));
-    height: 50px;
-    transition: transform 0.1s;
-    width: 50px !important;
-
-    &:hover {
-      transform: scale(1.4);
-    }
   }
 }
 </style>

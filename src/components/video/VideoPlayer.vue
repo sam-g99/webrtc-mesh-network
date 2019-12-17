@@ -1,5 +1,12 @@
 <template>
-  <div class="video-player">
+  <div
+    ref="videoContainer"
+    class="video-player"
+    :class="{ hideCursor: !showVideoControls }"
+    @mouseenter="showControls()"
+    @mousemove="resetTimeout()"
+    @mouseleave="resetTimeout()"
+  >
     <div ref="videoContainer" class="video-container">
       <video ref="mainVideo" autoplay></video>
       <!-- <div class="top-layer">
@@ -12,11 +19,11 @@
           Live
         </div>
       </div> -->
-      <Controls />
+      <Controls :show="showVideoControls" />
     </div>
-    <!-- <div v-if="!videoStream" class="layer">
+    <div v-if="!videoStream" class="waiting-layer">
       <p class="wait">Waiting for stream</p>
-    </div> -->
+    </div>
   </div>
 </template>
 
@@ -35,10 +42,12 @@ export default {
   data() {
     return {
       streamPending: false,
+      showVideoControls: false,
+      hideControlsTimeout: null,
     };
   },
   computed: {
-    ...mapState(['videoStream']),
+    ...mapState(['videoStream', 'conns']),
   },
 
   watch: {
@@ -49,7 +58,9 @@ export default {
         console.log('set stream');
         videoPlayer.srcObject = stream;
       } else {
-        console.log('stopped');
+        if (this.$route.name === 'host') {
+          this.sendToAllPeers(this.conns, { type: 'streamStopped' });
+        }
         const tracks = videoPlayer.srcObject.getTracks();
         tracks.forEach(track => track.stop());
       }
@@ -73,39 +84,45 @@ export default {
   },
   methods: {
     ...mapMutations(['updateStream']),
+    hideControls() {
+      this.showVideoControls = false;
+    },
+    showControls() {
+      this.showVideoControls = true;
+      this.hideControlsTimeout = setTimeout(this.hideControls, 1500);
+    },
+    resetTimeout() {
+      this.showVideoControls = true;
+      clearTimeout(this.hideControlsTimeout);
+      this.hideControlsTimeout = setTimeout(this.hideControls, 1500);
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.video-container {
-  &:hover > .controls {
-    opacity: 1 !important;
-    transition-delay: 0s;
-  }
-}
-
 .video-player {
   background: rgb(29, 29, 29);
   display: flex;
   flex-flow: column;
+  max-height: 641px;
+  padding-top: 56.25%;
   position: relative;
   width: 100%;
-  padding-top: 56.25%;
-  max-height: 641px;
 
   @include breakpoint(1400) {
-    padding-top: 0;
     height: 640px;
+    padding-top: 0;
   }
+
   .video-container {
     align-items: center;
     display: flex;
     flex-flow: column;
     height: 100%;
+    left: 0;
     position: absolute;
     top: 0;
-    left: 0;
     width: 100%;
 
     video {
@@ -115,8 +132,20 @@ export default {
     }
   }
 
-  .layer {
+  .waiting-layer {
+    align-items: center;
+    background: rgb(20, 20, 20);
+    display: flex;
+    height: 100%;
+    justify-content: center;
     position: absolute;
+    top: 0;
+    width: 100%;
+
+    .wait {
+      color: white;
+      font-size: 30px;
+    }
   }
 
   .top-layer {
@@ -154,5 +183,9 @@ export default {
     bottom: 0;
     position: absolute;
   }
+}
+
+.hideCursor {
+  cursor: none;
 }
 </style>

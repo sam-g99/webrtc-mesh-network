@@ -63,9 +63,8 @@ export default {
   overflow-y: scroll;
 
   .message-container {
-    border-radius: 0px;
     background: rgb(41, 41, 41);
-
+    border-radius: 0px;
     color: $offWhite;
     padding: 5px;
     width: 96%;
