@@ -8,17 +8,16 @@
       @keyup="isTyping()"
     />
     <div class="gif-results">
-      <div
-        v-for="index in 20"
-        v-if="typing"
-        :key="index"
-        class="loading-block"
-      ></div>
+      <div v-if="noResults" class="no-results">
+        <p>Sorry there's no gif results for that search</p>
+      </div>
+      <div v-if="typing">
+        <div v-for="index in 20" :key="index" class="loading-block"></div>
+      </div>
       <img
         v-for="(gif, index) in results"
         :key="index"
         :src="gif"
-        loading="lazy"
         @click="sendGif(gif)"
       />
     </div>
@@ -26,7 +25,6 @@
     <div v-if="categories" class="categories">
       <div
         v-for="category in categories"
-        v-if="category.searchterm !== 'kiss'"
         :key="category.searchterm"
         @click="setQuery(category.searchterm)"
       >
@@ -88,10 +86,12 @@ export default {
     this.getCategories();
     document.addEventListener('click', e => {
       var element = document.getElementById('tenorArea');
+      //
       if (element && e.target.id !== 'gifButton') {
         if (e.target !== element && !element.contains(e.target)) {
           if (this.active) {
             this.$emit('focusAway');
+            this.noResults = false;
           }
         }
       }
@@ -162,6 +162,7 @@ export default {
       this.searchGifs();
     },
     async searchGifs() {
+      this.noResults = false;
       this.results = [];
       if (this.query.trim() === '') {
         this.typing = false;
@@ -174,6 +175,7 @@ export default {
       const gifs = await response.json();
       //console.log(gifs.results[0].media[0].gif);
       if (gifs.results.length === 0) {
+        this.typing = false;
         this.noResults = true;
         return;
       }
@@ -181,9 +183,8 @@ export default {
         this.results.push(gif.media[0].gif.url);
       });
       document.getElementById('tenorArea').scrollTop = 0;
-      setTimeout(() => {
-        this.typing = false;
-      }, 100);
+
+      this.typing = false;
     },
     sendGif(gifLink) {
       const message = this.createGifMessage(gifLink);
@@ -209,38 +210,39 @@ export default {
   width: 100%;
 
   .loading-block {
-    width: 280px;
     background: rgb(56, 56, 56);
-    margin-bottom: 10px;
     height: 200px;
-    position: relative;
+    margin-bottom: 10px;
     overflow: hidden;
+    position: relative;
+    width: 280px;
 
-    &:after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -200px;
-      width: 130px;
-      height: 100%;
-      transform: skew(-20deg);
+    &::after {
+      animation-duration: 1s;
+      animation-iteration-count: infinite;
+      animation-name: shine;
       background-image: linear-gradient(
         to right,
         transparent,
         rgba(rgb(255, 255, 255), 0.3),
         transparent
       );
+      content: '';
+      height: 100%;
+      left: -200px;
+      position: absolute;
+      top: 0;
+      transform: skew(-20deg);
+      width: 130px;
       z-index: 100;
-      animation-name: shine;
-      animation-duration: 1s;
-      animation-iteration-count: infinite;
     }
   }
 
   .gif-results {
+    align-items: center;
     display: flex;
     flex-flow: column;
-    align-items: center;
+
     img {
       margin-bottom: 10px;
       width: 80%;
@@ -255,24 +257,26 @@ export default {
       }
     }
   }
+
   .categories {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    grid-gap: 10px;
     align-self: center;
-    width: 100%;
-    position: relative;
     cursor: pointer;
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: 50% 50%;
     padding-bottom: 10px;
+    position: relative;
+    width: 100%;
 
     .gif-background {
-      width: 100%;
+      background-size: cover;
       height: 100%;
+      left: 0;
       position: absolute;
       top: 0;
-      left: 0;
-      background-size: cover;
       transition-duration: 0.1s;
+      width: 100%;
+
       &:hover {
         transform: scale(1.1);
       }
@@ -280,41 +284,45 @@ export default {
 
     .overlay {
       background: rgba(31, 31, 31, 0.363);
+      height: 100%;
+      left: 0;
+      pointer-events: none;
       position: absolute;
       top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      pointer-events: none;
       transition-duration: 0.2s;
+      width: 100%;
+      z-index: 1;
     }
+
     .category {
       background: rgb(68, 68, 68);
-      text-align: center;
-      padding: 40px;
-      overflow: hidden;
+      color: white;
       height: 130px;
+      overflow: hidden;
+      padding: 40px;
+      position: relative;
+      text-align: center;
       width: 160px;
+
       &:hover > .gif-background {
         transform: scale(1.1);
       }
+
       &:hover > .overlay {
         background: rgba(255, 255, 255, 0.041);
       }
-      color: white;
-      position: relative;
 
       p {
-        position: relative;
-        z-index: 100;
-        pointer-events: none;
-        font-weight: 400;
         font-size: 18px;
+        font-weight: 400;
+        pointer-events: none;
+        position: relative;
         text-shadow: 0px 2px 2px rgb(19, 19, 19);
+        z-index: 100;
       }
     }
   }
+
   img {
     max-width: 100%;
   }
@@ -338,12 +346,23 @@ export default {
     }
   }
 }
+
 @keyframes shine {
   from {
     left: -200px;
   }
+
   to {
     left: 120%;
   }
+}
+
+.no-results {
+  background: rgb(255, 87, 87);
+  border-radius: 2px;
+  color: rgb(121, 8, 8);
+  margin-bottom: 10px;
+  margin-top: 4px;
+  padding: 5px;
 }
 </style>
