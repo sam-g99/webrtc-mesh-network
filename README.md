@@ -1,6 +1,7 @@
 Webrtc room, share your screen, send messages, pick an avatar, share images.
 
-[Live Demo](https://webrtcdemo.netlify.com/) 
+[Live Demo](https://webrtcdemo.netlify.com/)
+
 [Video Demo](https://youtu.be/zvBoi1XmVuo)
 
 ## License
