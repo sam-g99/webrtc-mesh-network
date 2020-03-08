@@ -1,4 +1,4 @@
-Webrtc room, share your screen, send messages, pick an avatar, share images.
+Webrtc room, share your screen, send messages, pick an avatar, share images/gifs.
 
 [Live Demo](https://webrtcdemo.netlify.com/)
 
