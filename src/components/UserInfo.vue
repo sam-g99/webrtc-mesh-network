@@ -82,7 +82,7 @@ export default {
       if (!this.open) {
         this.longTime = true;
       }
-    }, 3000);
+    }, 6000);
   },
 
   methods: {
