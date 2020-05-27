@@ -11,7 +11,7 @@ const stunServers = [{ urls: 'stun:stun.l.google.com:19302' }];
 function peerConnect(id) {
   return new Peer(id, {
     host: 'rocky-earth-16455.herokuapp.com',
-    port: 80,
+    secure: true,
     path: '/myapp',
     config: {
       iceServers: stunServers,
